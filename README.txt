@@ -14,12 +14,18 @@ Note: Use keys '1', '2', 'A', 'D', '3', '4' to navigate within the frames ; Use 
 python scripts/video_creation.py  # please choose the dataset folder, labels folder, save folder and sequence in the code
 
 
+##### NUSCENES #####
+
+Using 'scripts/create_nuscenes_format.py' and setting your paths pointing to the downloaded dataset creates the nuScenes format (Use 'scripts' environment to run the data conversion).
+Define your train, validation, and test split in the main function.
+
+
 ##### OPENCOOD #####
 
 ### PREPARE DATASET STRUCTURE ###
 Convert the original dataset format to OPENCOOD format using python scripts.
 
-1) Using 'scripts/create_opencood_format.py' and setting your paths pointing to the downloaded dataset creates the OPENCOOD format.
+1) Using 'scripts/create_opencood_format.py' and setting your paths pointing to the downloaded dataset creates the OPENCOOD format (Use 'scripts' environment to run the data conversion).
 2) To create the same splits as they are used in our experiments, please run 'scripts/create_opencood_splits.py'
 
 
