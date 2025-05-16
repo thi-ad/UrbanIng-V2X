@@ -17,7 +17,7 @@ python scripts/video_creation.py  # please choose the dataset folder, labels fol
 ##### NUSCENES #####
 
 Using 'scripts/create_nuscenes_format.py' and setting your paths pointing to the downloaded dataset creates the nuScenes format (Use 'scripts' environment to run the data conversion).
-Define your train, validation, and test split in the main function.
+Define your train, validation, and test split in the main function and set the 'ego_agents' variable to define your ego agent(s).
 
 
 ##### OPENCOOD #####
