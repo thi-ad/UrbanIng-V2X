@@ -1,4 +1,4 @@
-# 🚗 Urbaning-V2X Dataset Preparation & Visualization
+# 🚗 UrbanIng-V2X Dataset Preparation & Visualization
 
 This repository provides tools for dataset visualization, conversion, and training using **OpenCOOD**.  
 For simplicity, two separate environments are used: one for **scripts** and one for **OpenCOOD**.
@@ -13,13 +13,17 @@ For simplicity, two separate environments are used: one for **scripts** and one 
 | **opencood** | Used for training and inference using the OpenCOOD framework (Python 3.9). |
 
 ---
-### 1️⃣ Clone the repository
+
+### 1️⃣ Download the dataset
+You can download the dataset [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/A9LPY7).
+
+### 2️⃣ Clone the repository
 ```bash
 git clone https://github.com/thi-ad/UrbanIng-V2X.git
 cd UrbanIng-V2X
 ```
 
-### 2️⃣ Scripts Environment
+### 3️⃣ Scripts Environment
 ```bash
 # Create environment
 conda create -n scripts python=3.10 -y
@@ -29,7 +33,7 @@ conda activate scripts
 pip install -r scripts/requirements.txt
 ```
 
-### 3️⃣ OpenCOOD Environment
+### 4️⃣ OpenCOOD Environment
 We use the [OpenCOOD](https://github.com/DerrickXuNu/OpenCOOD) framework to evaluate our UrbanIng-V2X dataset on cooperative perception models.
 
 Navigate to *UrbanIng-V2X/opencood*.
