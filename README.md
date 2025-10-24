@@ -13,9 +13,13 @@ For simplicity, two separate environments are used: one for **scripts** and one 
 | **opencood** | Used for training and inference using the OpenCOOD framework (Python 3.9). |
 
 ---
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/thi-ad/UrbanIng-V2X.git
+cd UrbanIng-V2X
+```
 
-### 1️⃣ Scripts Environment
-
+### 2️⃣ Scripts Environment
 ```bash
 # Create environment
 conda create -n scripts python=3.10 -y
@@ -25,18 +29,22 @@ conda activate scripts
 pip install -r scripts/requirements.txt
 ```
 
-### 2️⃣ OpenCOOD Environment
+### 3️⃣ OpenCOOD Environment
+We use the [OpenCOOD](https://github.com/DerrickXuNu/OpenCOOD) framework to evaluate our UrbanIng-V2X dataset on cooperative perception models.
+
+Navigate to *UrbanIng-V2X/opencood*.
+
 ```bash
 # Create environment
-conda create -n v2x_dataset python=3.9 -y
-conda activate v2x_dataset
+conda env create -f opencood/environment.yml
+conda activate UrbanIng_v2x
 
 # Install PyTorch
 conda install pytorch==1.12.0 torchvision==0.13.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 
 # Install other dependencies
-pip install -r requirements.txt
-python setup.py develop
+pip install -r opencood/requirements.txt
+python opencood/setup.py develop
 
 # Install spconv 2.x
 pip install spconv-cu113
@@ -91,13 +99,15 @@ python scripts/create_opencood_splits.py
 (Use the scripts environment for these steps.)
 
 ## 🏋️ Training OpenCOOD
+Navigate to *UrbanIng-V2X/opencood*.
 ```
-python opencood/tools/train.py --hypes_yaml hypes_yaml/xxxx.yaml --half
+python opencood/tools/train.py --hypes_yaml opencood/hypes_yaml/your-config.yaml --half
 ```
 - Replace xxxx.yaml with your configuration file.
 - `--half`:  Enables mixed precision training (optional).
 
 ## 🔍 Inference OpenCOOD
+Navigate to *UrbanIng-V2X/opencood*.
 ```
 python opencood/tools/inference.py \
   --model_dir ${CHECKPOINT_FOLDER} \
@@ -117,8 +127,8 @@ python opencood/tools/inference.py \
 | nuScenes format conversion | `python scripts/create_nuscenes_format.py` | scripts |
 | OpenCOOD format conversion | `python scripts/create_opencood_format.py` | scripts |
 | Create OpenCOOD splits | `python scripts/create_opencood_splits.py` | scripts |
-| Model training | `python opencood/tools/train.py` | opencood |
-| Inference | `python opencood/tools/inference.py` | opencood |
+| Model training | `python opencood/opencood/tools/train.py` | opencood |
+| Inference | `python opencood/opencood/tools/inference.py` | opencood |
 
 💡 Tips
 
@@ -127,3 +137,6 @@ python opencood/tools/inference.py \
 - Ensure CUDA is properly installed for training and NMS compilation.
 
 - Use separate environments for scripts and OpenCOOD to prevent dependency conflicts.
+
+## Download links
+You can find model weights and anonymization information [here](https://faubox.rrze.uni-erlangen.de/getlink/fi3zwWqSZw25CvViXRtoZr/).
