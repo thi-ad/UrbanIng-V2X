@@ -1,13 +1,13 @@
-name: opencood_ingolstadt_crossings
+name: UrbanIng_v2x
 channels:
   - defaults
 dependencies:
   - pip==21.1.2
   - python==3.9
   - pip:
-    - matplotlib==3.4.2
-    - numpy
-    - open3d
+    - matplotlib~=3.4.2
+    - numpy==1.21.6
+    - open3d==0.17.0
     - opencv-python==4.5.5.62
     - cython
     - pygame

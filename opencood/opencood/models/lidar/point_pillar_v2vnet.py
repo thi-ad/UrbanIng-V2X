@@ -71,6 +71,55 @@ class PointPillarV2VNet(nn.Module):
             p.requires_grad = False
         for p in self.reg_head.parameters():
             p.requires_grad = False
+    
+
+    def extract_features(self, data_dict):
+        voxel_features = data_dict['processed_lidar']['voxel_features']
+        voxel_coords = data_dict['processed_lidar']['voxel_coords']
+        voxel_num_points = data_dict['processed_lidar']['voxel_num_points']
+        record_len = data_dict['record_len']
+
+        batch_dict = {'voxel_features': voxel_features,
+                      'voxel_coords': voxel_coords,
+                      'voxel_num_points': voxel_num_points,
+                      'record_len': record_len}
+        # n, 4 -> n, c
+        batch_dict = self.pillar_vfe(batch_dict)
+        # n, c -> N, C, H, W
+        batch_dict = self.scatter(batch_dict)
+        batch_dict = self.backbone(batch_dict)
+
+        spatial_features_2d = batch_dict['spatial_features_2d']
+        # downsample feature to reduce memory
+        if self.shrink_flag:
+            spatial_features_2d = self.shrink_conv(spatial_features_2d)
+        # compressor
+        if self.compression:
+            spatial_features_2d = self.naive_compressor(spatial_features_2d)
+        
+        return spatial_features_2d
+
+
+    def fuse_features(self, data):
+        spatial_features_2d = data['bev']
+        record_len = data['record_len']
+
+        pairwise_t_matrix = data['pairwise_t_matrix']
+
+        # compressor
+        if self.compression:
+            spatial_features_2d = self.naive_compressor(spatial_features_2d, "decoder")
+
+        fused_feature = self.fusion_net(spatial_features_2d, record_len, pairwise_t_matrix)
+
+        psm = self.cls_head(fused_feature)
+        rm = self.reg_head(fused_feature)
+
+        output_dict = {'psm': psm,
+                       'rm': rm}
+
+        return output_dict
+
 
     def forward(self, data_dict):
         voxel_features = data_dict['processed_lidar']['voxel_features']
@@ -94,9 +143,11 @@ class PointPillarV2VNet(nn.Module):
         # downsample feature to reduce memory
         if self.shrink_flag:
             spatial_features_2d = self.shrink_conv(spatial_features_2d)
+
         # compressor
         if self.compression:
             spatial_features_2d = self.naive_compressor(spatial_features_2d)
+        
         fused_feature = self.fusion_net(spatial_features_2d,
                                         record_len,
                                         pairwise_t_matrix)

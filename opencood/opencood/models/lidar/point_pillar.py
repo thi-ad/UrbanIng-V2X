@@ -59,3 +59,4 @@ class PointPillar(nn.Module):
                        'rm': rm}
 
         return output_dict
+    

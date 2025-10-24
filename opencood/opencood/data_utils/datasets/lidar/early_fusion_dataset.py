@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Runsheng Xu <rxx3386@ucla.edu>
+# Edited: Dominik Roessle <dominik.roessle@thi.de>
 # License: TDG-Attribution-NonCommercial-NoDistrib
 
 """
