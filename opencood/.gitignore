@@ -7,7 +7,6 @@ runs
 *.jpg
 *.pcd
 *.yaml
-visualization
 *pkl
 logs
 

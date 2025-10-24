@@ -1,0 +1,257 @@
+data_augment:
+- ALONG_AXIS_LIST:
+  - x
+  NAME: random_world_flip
+- NAME: random_world_rotation
+  WORLD_ROT_ANGLE:
+  - -0.78539816
+  - 0.78539816
+- NAME: random_world_scaling
+  WORLD_SCALE_RANGE:
+  - 0.95
+  - 1.05
+fusion:
+  args: []
+  core_method: LidarIntermediateFusionDataset
+loss:
+  args:
+    cls_weight: 1.0
+    num_class: 4
+    reg: 2.0
+  core_method: point_pillar_loss
+lr_scheduler:
+  core_method: cosineannealwarm
+  epoches: 60
+  lr_min: 2.0e-05
+  warmup_epoches: 10
+  warmup_lr: 0.0002
+model:
+  args:
+    anchor_num: 2
+    anchor_number: 2
+    backbone_fix: false
+    base_bev_backbone:
+      layer_nums:
+      - 3
+      - 5
+      - 8
+      layer_strides:
+      - 2
+      - 2
+      - 2
+      num_filters:
+      - 64
+      - 128
+      - 256
+      num_upsample_filter:
+      - 128
+      - 128
+      - 128
+      upsample_strides:
+      - 1
+      - 2
+      - 4
+    compression: 0
+    fax_fusion:
+      agent_size: 3
+      depth: 3
+      dim_head: 32
+      drop_out: 0.1
+      input_dim: 256
+      mask: true
+      mlp_dim: 256
+      window_size: 4
+    lidar_range: &id001
+    - -102.4
+    - -40
+    - -5
+    - 102.4
+    - 40
+    - 5
+    max_cav: 3
+    num_class: 4
+    pillar_vfe:
+      num_filters:
+      - 64
+      use_absolute_xyz: true
+      use_norm: true
+      with_distance: false
+    point_pillar_scatter:
+      grid_size: !!python/object/apply:numpy.core.multiarray._reconstruct
+        args:
+        - !!python/name:numpy.ndarray ''
+        - !!python/tuple
+          - 0
+        - !!binary |
+          Yg==
+        state: !!python/tuple
+        - 1
+        - !!python/tuple
+          - 3
+        - !!python/object/apply:numpy.dtype
+          args:
+          - i8
+          - false
+          - true
+          state: !!python/tuple
+          - 3
+          - <
+          - null
+          - null
+          - null
+          - -1
+          - -1
+          - 0
+        - false
+        - !!binary |
+          AAIAAAAAAADIAAAAAAAAAAEAAAAAAAAA
+      num_features: 64
+    shrink_header:
+      dim:
+      - 256
+      input_dim: 384
+      kernal_size:
+      - 1
+      padding:
+      - 0
+      stride:
+      - 1
+    voxel_size: &id003
+    - 0.4
+    - 0.4
+    - 10
+  core_method: lidar.point_pillar_cobevt
+name: sis_train_c1_c2_test_c3_cobevt
+optimizer:
+  args:
+    eps: 1.0e-10
+    weight_decay: 0.0001
+  core_method: Adam
+  lr: 0.001
+postprocess:
+  anchor_args:
+    D: 1
+    H: 200
+    W: 512
+    anchor_generator_config: &id002
+    - align_center: true
+      anchor_bottom_heights:
+      - -1.78
+      anchor_rotations:
+      - 0
+      - 1.57
+      anchor_sizes:
+      - - 4.0
+        - 1.75
+        - 1.6
+      class_name: Vehicle
+      feature_map_stride: 2
+      includes_classes:
+      - Car
+      - Van
+      matched_threshold: 0.6
+      unmatched_threshold: 0.45
+    - align_center: true
+      anchor_bottom_heights:
+      - -1.78
+      anchor_rotations:
+      - 0
+      - 1.57
+      anchor_sizes:
+      - - 6.0
+        - 2.5
+        - 2.5
+      class_name: Heavy_Vehicle
+      feature_map_stride: 2
+      includes_classes:
+      - Truck
+      - Bus
+      - Trailer
+      - OtherVehicle
+      matched_threshold: 0.6
+      unmatched_threshold: 0.45
+    - align_center: true
+      anchor_bottom_heights:
+      - -0.6
+      anchor_rotations:
+      - 0
+      - 1.57
+      anchor_sizes:
+      - - 2.0
+        - 1.0
+        - 1.5
+      class_name: 2Wheeler
+      feature_map_stride: 2
+      includes_classes:
+      - Cyclist
+      - Motorcycle
+      - E-Scooter
+      matched_threshold: 0.6
+      unmatched_threshold: 0.45
+    - align_center: true
+      anchor_bottom_heights:
+      - -0.6
+      anchor_rotations:
+      - 0
+      - 1.57
+      anchor_sizes:
+      - - 0.8
+        - 0.8
+        - 1.8
+      class_name: Pedestrian
+      feature_map_stride: 2
+      includes_classes:
+      - Pedestrian
+      - OtherPedestrian
+      matched_threshold: 0.6
+      unmatched_threshold: 0.45
+    cav_lidar_range: *id001
+    num: 2
+    vd: 10
+    vh: 0.4
+    vw: 0.4
+  core_method: VoxelPostprocessor
+  max_num: 150
+  nms_thresh: 0.15
+  order: hwl
+  target_args:
+    score_threshold: 0.2
+preprocess:
+  anchor_generator_config: *id002
+  args:
+    max_points_per_voxel: 32
+    max_voxel_test: 70000
+    max_voxel_train: 32000
+    voxel_size: *id003
+  cav_lidar_range: *id001
+  cav_lidar_range_validation:
+  - -100
+  - -40
+  - -5
+  - 100
+  - 40
+  - 5
+  core_method: SpVoxelPreprocessor
+  num_class: 4
+root_dir: /path/to/opencood/splits/sis/sis_train_crossing1_crossing2_test_crossing3/train
+train_params:
+  batch_size: 4
+  epoches: 60
+  eval_freq: 10
+  include_infrastructure: true
+  max_cav: 3
+  min_lidar_hits_per_object: 5
+  save_freq: 10
+  seed: 109308083
+validate_dir: /path/to/opencood/splits/sis/sis_train_crossing1_crossing2_test_crossing3/val
+wild_setting:
+  async: false
+  async_overhead: 100
+  backbone_delay: 10
+  data_size: 1.06
+  loc_err: false
+  ryp_std: 0.2
+  seed: 20
+  transmission_speed: 27
+  xyz_std: 0.2
+yaml_parser: load_point_pillar_params
