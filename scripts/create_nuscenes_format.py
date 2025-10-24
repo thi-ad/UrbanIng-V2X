@@ -437,9 +437,10 @@ class ExtractNuscenesSequence():
         with open(self.labels_folder + '_av_track_ids.json', 'r') as f:
             self.av_track_id_map = json.load(f)
 
-        self.crossing_cameras, self.crossing_lidars, self.vehicle_cameras, self.vehicle_lidars, self.vehicle_states = get_general_folder_information()
-        
-        self.lidar_sources = [lidar for lidar in self.vehicle_lidars["vehicle1"] + self.vehicle_lidars["vehicle2"] + self.crossing_lidars[self.crossing_number]]
+        crossing_cameras, crossing_lidars, self.vehicle_cameras, self.vehicle_lidars, self.vehicle_states = get_general_folder_information()
+        self.crossing_cameras = [camera for camera in crossing_cameras[self.crossing_number] if "crossing" in camera]
+        self.crossing_lidars = crossing_lidars[self.crossing_number]
+        self.lidar_sources = [lidar for lidar in self.vehicle_lidars["vehicle1"] + self.vehicle_lidars["vehicle2"] + self.crossing_lidars]
         self.lidar_index_mapping, self.vehicle_states_id_mapping = get_additional_dataset_information()
         
         skipped_tracks = [self.av_track_id_map[self.sequence][self.ego]] if "vehicle" in self.ego else []
@@ -450,8 +451,6 @@ class ExtractNuscenesSequence():
     def fill_raw_data_dependent_information(self):           
         for col in tqdm(self.time_sync_df.columns, desc= f"Processing all tracks of sequence {self.sequence} of {self.ego}"):
             
-            if col == "2":
-                break
             this_step_info = self.time_sync_df[col] 
             frame_timestamp_ms = int(this_step_info['timestamp_ms'])          
 
@@ -472,7 +471,18 @@ class ExtractNuscenesSequence():
                 if key.endswith('camera'): 
                     topic = key
                     sensor_root_path = os.path.join(self.target_sample_folder, topic)
-                    sTagent = self.calib_data[key]['extrinsics']['cTv'] if key.startswith('vehicle') else value['cTg']
+                    if 'vehicle' in curr_agent:
+                        camera_capture_time = int(this_step_info[key].split('.')[0])
+                        with open(os.path.join(self.root_folder, self.sequence, curr_agent + '_state',
+                                        str((camera_capture_time // 10) * 10) + '.json'), 'r') as f:
+                            vehicle_state_camera_capture_time = json.load(f)
+
+                        agent_cctTg = np.linalg.inv(np.asarray(vehicle_state_camera_capture_time['gTv']))  # cct = camera capture time
+                        agent_cctTagent = agent_cctTg @ gTagent_dict[curr_agent]
+
+                        sTagent = self.calib_data[key]['extrinsics']['cTv'] @ agent_cctTagent 
+                    else:
+                        sTagent = value['cTg']
                     iTc = self.calib_data[key]['intrinsics']['IntrinsicMatrixNew']
                     filename = f"{sensor_root_path}/{self.sequence}_{frame_timestamp_ms:06d}.jpg" 
                     fileformat = "jpg"
@@ -485,6 +495,8 @@ class ExtractNuscenesSequence():
                 elif key.endswith('lidar') and curr_agent == self.ego:
                     if curr_agent == "crossing" and crossing_lidar_done:
                         continue
+                    else:
+                        crossing_lidar_done = True
                     topic = self.fused_lidar_topic
                     sensor_root_path = os.path.join(self.target_sample_folder, topic)
                     filename = f"{sensor_root_path}/{self.ego}_{self.sequence}_{frame_timestamp_ms:06d}.pcd.bin"
@@ -499,15 +511,12 @@ class ExtractNuscenesSequence():
                     
                     pcd_ego_vis = np.hstack((pcd_ego_lidar[:, :3], pcd_ego_lidar[:, -2:])) 
                     pcd_ego_vis.tofile(filename)
-                    crossing_lidar_done = True
-      
                 else:
                     continue
                 
                 if curr_agent != self.ego:
                     sTego = sTagent @ np.linalg.inv(gTagent_dict[curr_agent]) @ gTagent_dict[self.ego] 
-                    egoTs = sTego
-                    #egoTs = np.linalg.inv(sTego)
+                    egoTs = np.linalg.inv(sTego)
                 else:
                     egoTs = np.linalg.inv(sTagent)
                 
@@ -631,13 +640,9 @@ def main():
     TRAIN = ['20241126_0024_crossing1_08', '20241126_0022_crossing1_08', '20241126_0022_crossing1_09', '20241127_0003_crossing1_09', '20241127_0000_crossing1_00', '20241126_0024_crossing1_18', '20241126_0008_crossing1_01', '20241126_0025_crossing1_01', '20241127_0008_crossing1_00', '20241126_0018_crossing1_00', '20241126_0025_crossing1_00', '20241126_0008_crossing1_00', '20241126_0010_crossing2_00', '20241127_0014_crossing2_00', '20241127_0029_crossing2_00', '20241126_0019_crossing2_00', '20241126_0001_crossing2_00', '20241126_0013_crossing2_00', '20241127_0011_crossing3_00', '20241127_0010_crossing3_09', '20241127_0012_crossing3_00']
     VAL = ['20241126_0024_crossing1_19', '20241126_0024_crossing1_09', '20241127_0026_crossing2_08', '20241127_0026_crossing2_09', '20241127_0010_crossing3_08', '20241127_0024_crossing3_08']
     TEST = ['20241126_0014_crossing1_00', '20241126_0017_crossing1_00', '20241127_0003_crossing1_08', '20241126_0004_crossing2_00', '20241127_0025_crossing2_00', '20241127_0009_crossing3_00', '20241127_0024_crossing3_09']
-    sequences = TRAIN[:1] + VAL[:1]
-    CustomNuscenesObject = ExtractCustomNuscenes(root_folder, labels_folder, sequences, target_nuscenes_folder, version='v1.0-trainval', train_seq_names=TRAIN, use_multiprocessing=False)
-    CustomNuscenesObject.write_tables()
-    #CustomNuscenesObject = ExtractCustomNuscenes(root_folder, labels_folder, TEST, target_nuscenes_folder, version='v1.0-test', train_seq_names=TRAIN, use_multiprocessing=False)
-    #CustomNuscenesObject.write_tables()
-    
-
+    trainval_sequences = TRAIN + VAL
+    CustomNuscenesObject = ExtractCustomNuscenes(root_folder, labels_folder, trainval_sequences, target_nuscenes_folder, version='v1.0-trainval', train_seq_names=TRAIN, use_multiprocessing=False)
+    CustomNuscenesObject.write_tables()    
 if __name__ == "__main__":
     freeze_support()
     main()
