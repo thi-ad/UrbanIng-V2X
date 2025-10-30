@@ -4,35 +4,32 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "urbaning"
+urls = { "Homepage" = "https://github.com/thi-ad/UrbanIng-V2X" }
 authors = [
     {name = "Karthikeyan Chandra Sekaran", email = "karthikeyan.chandrasekaran@thi.de"},
     {name = "Markus Geißler", email = "markus.geisler@thi.de"},
     {name = "Dominik Roßle", email = "dominik.rossle@thi.de"},
 ]
-version = "0.0.1"
+version = "1.0.0"
 description = "UrbanIng Dataset DevKit"
-readme = "README.md"
-license = { text="Apache 2.0" }
+readme = "api_readme.md"
+license = { text="MIT" }
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
 ]
 dependencies = [
-    "lmdb<2",
-    "packaging",
-    "numpy<2",
-    "shapely<3",
-    "dashtable<2",
-    "rich<14",
-    "scipy<2",
-    "click<9",
-    "joblib<2",
-    "pyyaml<7",
-    "opencv-python-headless<5",
-    "matplotlib<4",
-    "bs4<0.1",
-    "seaborn<1"
+    "lanelet2",
+    "matplotlib",
+    "open3d",
+    "pandas",
+    "pyproj",
+    "PyYAML",
+    "scipy",
+    "tqdm",
+    "opencv-python",
+    "pyDataverse"
 ]
 
 [tool.setuptools.packages.find]

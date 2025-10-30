@@ -1,18 +1,23 @@
 #    Urbaning
 #    Copyright (C) 2025  Technische Hochschule Ingolstadt
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#    Permission is hereby granted, free of charge, to any person obtaining a copy
+#    of this software and associated documentation files (the "Software"), to deal
+#    in the Software without restriction, including without limitation the rights
+#    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#    copies of the Software, and to permit persons to whom the Software is
+#    furnished to do so, subject to the following conditions:
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    The above copyright notice and this permission notice shall be included in all
+#    copies or substantial portions of the Software.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#    SOFTWARE.
 
 from __future__ import annotations
 
@@ -34,15 +39,17 @@ from .registry import _xTg_registry
 
 from .utils import (
     convert_labels_from_tracks_wise_to_timestamp_wise,
-    get_lidar_index_mapping,
-    get_vehicle_states_id_mapping,
     redo_calib,
     redo_av_vehicle_data,
     get_wTg,
-    gps_origins,
-    ground_params,
 )
 
+from .info import (
+    lidar_index_mapping,
+    vehicle_states_id_mapping,
+    ground_params,
+    gps_origins
+)
 
 class Sequence:
     """Represents a dataset sequence, providing frame-level access and sensor data parsing.
@@ -69,10 +76,6 @@ class Sequence:
         Preprocessed AV vehicle data loaded from JSON.
     labels : dict
         Labels converted from track-wise to timestamp-wise format.
-    lidar_index_mapping : dict
-        Mapping of LiDAR sensor names to their index in the fused point cloud.
-    vehicle_states_id_mapping : dict
-        Mapping of vehicle state IDs to their associated vehicle names.
     WORLD : str
         Name of the global world coordinate frame for this sequence.
     lanelet_map : LLMap
@@ -120,10 +123,6 @@ class Sequence:
         with open(self.label_file, "r") as f:
             labels = json.load(f)
         self.labels = convert_labels_from_tracks_wise_to_timestamp_wise(labels)
-
-        # Load auxiliary mappings
-        self.lidar_index_mapping = get_lidar_index_mapping()
-        self.vehicle_states_id_mapping = get_vehicle_states_id_mapping()
 
         # Initialize world frame for this sequence
         crossing_name = sequence_name.split("_")[2]
@@ -188,15 +187,17 @@ class Sequence:
             # ---------------- Vehicle Sensors ----------------
             if k.startswith("vehicle"):
                 vehicle_name = k.split("_")[0]
+                vehicle_state_name = vehicle_name + "_state"
+
                 if vehicle_name not in frame.vehicles:
-                    frame.vehicles[vehicle_name] = Vehicle(vehicle_name)
+                    frame.vehicles[vehicle_name] = Vehicle(vehicle_name, vehicle_states_id_mapping[vehicle_state_name])
                 vehicle = frame.vehicles[vehicle_name]
 
                 if k.endswith("camera"):
                     with open(
                         os.path.join(
                             self.sequence_root,
-                            vehicle_name + "_state",
+                            vehicle_state_name,
                             str((int(v.split(".")[0]) // 10) * 10) + ".json",
                         ),
                         "r",
@@ -222,7 +223,7 @@ class Sequence:
                     with open(
                         os.path.join(
                             self.sequence_root,
-                            vehicle_name + "_state",
+                            vehicle_state_name,
                             str((int(v.split(".")[0]) // 10) * 10) + ".json",
                         ),
                         "r",
@@ -232,7 +233,7 @@ class Sequence:
                     vTl = self.calib_data[k]["extrinsics"]["vTl"]
                     gTl = gTv.dot(vTl)
                     lidar_data = LidarData(
-                        k, os.path.join(self.sequence_root, k, v), gTl, self.lidar_index_mapping[k]
+                        k, os.path.join(self.sequence_root, k, v), gTl, lidar_index_mapping[k]
                     )
                     vehicle.add_lidar(k, lidar_data)
 
@@ -245,7 +246,7 @@ class Sequence:
             elif k.startswith("crossing"):
                 infra_name = k.split("_")[0]
                 if infra_name not in frame.infrastructures:
-                    frame.infrastructures[infra_name] = Infrastructure(infra_name)
+                    frame.infrastructures[infra_name] = Infrastructure(infra_name, vehicle_states_id_mapping[infra_name])
                 infra = frame.infrastructures[infra_name]
 
                 if k.endswith("camera"):
@@ -265,7 +266,7 @@ class Sequence:
 
                 elif k.endswith("lidar"):
                     gTl = self.calib_data[k]["extrinsics"]["gTl"]
-                    lidar_data = LidarData(k, os.path.join(self.sequence_root, k, v), gTl, self.lidar_index_mapping[k])
+                    lidar_data = LidarData(k, os.path.join(self.sequence_root, k, v), gTl, lidar_index_mapping[k])
                     infra.add_lidar(k, lidar_data)
 
             # ---------------- Miscellaneous ----------------

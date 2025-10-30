@@ -1,10 +1,9 @@
-# Byte-compiled / optimized / DLL files
+# -----------------------------
+# Python
+# -----------------------------
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -26,12 +25,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# PyInstaller
-# Usually these files are written by a python script from a template
-# before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -47,60 +40,15 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
-*.pytest_cache/
-cover/
-# Pytest cache
+*.hypothesis/
 .pytest_cache/
+cover/
 
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-doc/_build/
-
-# Jupyter Notebook
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
 
 # pyenv
 .python-version
-
-# pipenv
-#   According to pipenv documentation, you should include Pipfile.lock in version control.
-#   However, in case of team use with different environments, you can ignore it:
-# Pipfile.lock
-
-# poetry
-# Uncomment if you don’t want to track poetry.lock
-# poetry.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env
@@ -110,20 +58,22 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.conda/
-.conda_env/
 
-# Spyder project settings
+# Spyder IDE
 .spyderproject
 .spyproject
 
-# Rope project settings
+# Rope IDE
 .ropeproject
 
-# mkdocs documentation
-/site
+# VS Code
+.vscode/
+.history/
 
-# mypy
+# PyCharm
+.idea/
+
+# mypy / type checking
 .mypy_cache/
 .dmypy.json
 dmypy.json
@@ -131,26 +81,45 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# pytype
+# Pytype
 .pytype/
 
-# Cython debug symbols
-cython_debug/
-
-# VS Code
-.vscode/
-
-# JetBrains IDEs
-.idea/
-
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# profiling data
+.prof
+profile_default/
+ipython_config.py
 
 # Logs
 *.log
 logs/
+
+# Local data / temp files
+*.dat
+*.csv
+*.tmp
+*.bak
+*.swp
+*~
+
+# System files
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Optional: project-specific
+# -----------------------------
+# If you use notebooks with outputs, uncomment to ignore them
+# *.ipynb
+
+# If you use coverage or test reports in HTML
+# reports/
+
+# If using Hatch / Poetry / Pipenv
+*.lock
+poetry.lock
+Pipfile.lock
+
+# If using Cython or compiled extensions
+*.so
+*.pyd
+*.dll
