@@ -179,7 +179,7 @@ git clone https://github.com/thi-ad/UrbanIng-V2X.git
 cd UrbanIng-V2X
 ```
 
-### 🔁 OpenCOOD Format Conversion
+### 🔁 OpenCOOD format conversion
 We use the [OpenCOOD](https://github.com/DerrickXuNu/OpenCOOD) framework to evaluate our UrbanIng-V2X dataset on cooperative perception models.
 Please download the dataset and unzip by following the above description.
 To convert the dataset to OpenCOOD format:
@@ -189,7 +189,7 @@ from urbaning.converters import urbaning_to_opencood_format
 urbaning_to_opencood_format(source_folder="datasets/UrbanIng-V2X", target_folder="datasets/UrbanIng-V2X-OpenCOOD-format")
 ```
 
-### 🧾 OpenCOOD Environment
+### 🧾 OpenCOOD environment
 Used for training and inference using the OpenCOOD framework (Python 3.9)
 Navigate to *UrbanIng-V2X/opencood*.
 
@@ -238,7 +238,7 @@ python opencood/tools/inference.py \
 - `--show_vis`: Enable visualization
 - `--show_sequence`: Show sequential frame results
 
-💡 Tips
+### 💡 Tips
 
 - Keep dataset paths absolute to avoid errors.
 
@@ -254,9 +254,6 @@ python opencood/tools/inference.py \
  for details.
 
 - **Dataset**: Licensed under the Creative Commons Attribution 4.0 International [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en). You must give appropriate credit; Cannot be used for commercial purposes; You may not distribute modified versions of the dataset.
-
-💡 Note: Please cite the dataset and the associated paper when using it in your work.
-
 --- 
 
 ## 📖 Citation
