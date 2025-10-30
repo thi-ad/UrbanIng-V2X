@@ -21,9 +21,14 @@
 
 from __future__ import annotations
 import numpy as np
-from lanelet2.core import GPSPoint, BasicPoint3d
-from lanelet2.io import load, Origin
-from lanelet2.projection import UtmProjector
+try:
+    from lanelet2.core import GPSPoint, BasicPoint3d
+    from lanelet2.io import load, Origin
+    from lanelet2.projection import UtmProjector
+    LANELET2FOUND = True
+except:
+    pass
+    LANELET2FOUND = False
 
 from .registry import _xTg_registry, _transform_points
 
@@ -71,8 +76,9 @@ class LLMap:
         self.lato, self.lono, self.alto = origin
         self.ground_params: tuple[float, float, float, float, float, float] = ground_params
 
-        self.projector: UtmProjector = UtmProjector(Origin(self.lato, self.lono))
-        self.map = load(self.map_file_name, self.projector)
+        if LANELET2FOUND:
+            self.projector: UtmProjector = UtmProjector(Origin(self.lato, self.lono))
+            self.map = load(self.map_file_name, self.projector)
 
     def get_z_values_of_points(self, points: np.ndarray) -> np.ndarray:
         """Compute ground elevation (z-values) for given (x, y) points.

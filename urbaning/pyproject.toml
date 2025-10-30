@@ -10,7 +10,7 @@ authors = [
     {name = "Markus Geißler", email = "markus.geisler@thi.de"},
     {name = "Dominik Roßle", email = "dominik.rossle@thi.de"},
 ]
-version = "1.0.0"
+version = "1.0.1"
 description = "UrbanIng Dataset DevKit"
 readme = "api_readme.md"
 license = { text="MIT" }
@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python",
 ]
 dependencies = [
-    "lanelet2",
+    "lanelet2; sys_platform == 'linux'",
     "matplotlib",
     "open3d",
     "pandas",
