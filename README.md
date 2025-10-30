@@ -61,6 +61,7 @@ unzip_dataset(dataset_folder="datasets/UrbanIng-V2X")
 Dataset can also be downloaded from [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/A9LPY7).
 
 ### 🗂️ Dataset structure
+After the dataset is downloaded and unziped, it should look like this.
 ```yaml
 . [DATA_ROOT] # Dataset root folder
 ├── 📂dataset # data files
