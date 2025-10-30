@@ -257,6 +257,12 @@ python opencood/tools/inference.py \
 - **Dataset**: Licensed under the Creative Commons Attribution 4.0 International [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en). You must give appropriate credit; Cannot be used for commercial purposes; You may not distribute modified versions of the dataset.
 --- 
 
+
+## 🏆 Acknoledgements
+- This work represents a joint effort between the [CARISSMA Institute of Automated Driving](https://www.thi.de/forschung/carissma/c-iad/) and [AImotion  Bavaria](https://www.thi.de/forschung/aimotion/aboutaimotion/). 
+- The dataset was collected within the [High-Definition Testfield](https://www.thi.de/forschung/carissma/labore/reallabor-hdt/). 
+- This work was supported by the **Bavarian Academic Forum – BayWiss** and the **SiRaMiS project**, funded by the _Bavarian State Ministry of Science and the Arts (Bayerisches Staatsministerium für Wissenschaft und Kunst)_.  
+
 ## 📖 Citation
 If you use UrbanIng-V2X in your research, please cite:
 ```bibtex
