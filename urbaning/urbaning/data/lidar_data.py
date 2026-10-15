@@ -131,7 +131,7 @@ class LidarData:
             cali_points[..., 1] = cali_array['y']
             cali_points[..., 2] = cali_array['z']
             cali_points[..., 3] = cali_array['intensity']
-            cali_points[..., 4] = cali_array['time_offset_ms']
+            # cali_points[..., 4] = cali_array['time_offset_ms']
             cali_points[..., 5] = self.lidar_index
             self._point_cloud_in_lidar_coordinates = cali_points
         return self._point_cloud_in_lidar_coordinates

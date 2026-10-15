@@ -181,9 +181,9 @@ def redo_av_vehicle_data(av_vehicle_data):
     return av_vehicle_data
 
 
-def get_wTg(crossing_number):
+def get_wTg(crossing_number, world='crossing1'):
     lato, lono, alto = gps_origins[crossing_number]
-    lato_c1, lono_c1, alto_c1 = gps_origins['crossing1']
+    lato_c1, lono_c1, alto_c1 = gps_origins[world]
 
     utm_projector = Proj(proj="utm", zone=32)
     x_or, y_or = utm_projector(lono, lato)

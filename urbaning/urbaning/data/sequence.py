@@ -20,6 +20,7 @@
 #    SOFTWARE.
 
 from __future__ import annotations
+from collections.abc import Iterator
 
 import os
 import json
@@ -112,33 +113,42 @@ class Sequence:
         self.time_sync_df = pd.read_csv(time_sync_info_file).set_index("Unnamed: 0")
 
         # Load label track IDs for AV vehicles
-        with open(labels_av_track_ids_file, "r") as f:
-            self.labels_av_track_ids = json.load(f)[sequence_name]
+        if os.path.isfile(labels_av_track_ids_file):
+            with open(labels_av_track_ids_file, "r") as f:
+                self.labels_av_track_ids = json.load(f)[sequence_name]
+        else:
+            self.labels_av_track_ids = {}
 
         # Load and preprocess AV vehicle data
         with open(av_vehicle_data_file, "r") as f:
             self.av_vehicle_data = redo_av_vehicle_data(json.load(f))
 
         # Load labels and convert to timestamp-wise format
-        with open(self.label_file, "r") as f:
-            labels = json.load(f)
-        self.labels = convert_labels_from_tracks_wise_to_timestamp_wise(labels)
+        if os.path.isfile(self.label_file):
+            with open(self.label_file, "r") as f:
+                labels = json.load(f)
+            self.labels = convert_labels_from_tracks_wise_to_timestamp_wise(labels)
+        else:
+            self.labels = {}
 
         # Initialize world frame for this sequence
         crossing_name = sequence_name.split("_")[2]
         self.WORLD = "world_coordinates"
         _xTg_registry[self.WORLD] = get_wTg(crossing_name)
+        self.wTgs = {k:get_wTg(k, crossing_name) for k in gps_origins.keys()}
+        self.gTws = {k:np.linalg.inv(v) for k, v in self.wTgs.items()}
 
         # Load Lanelet2 map
-        self.lanelet_map = LLMap(
-            lanelet_map, gps_origins[crossing_name], ground_params[crossing_name]
-        )
+        if os.path.isfile(lanelet_map):
+            self.lanelet_map = LLMap(
+                lanelet_map, gps_origins[crossing_name], ground_params[crossing_name]
+            )
 
     def __len__(self) -> int:
         """Return the number of time steps (columns) in the sequence."""
         return len(self.time_sync_df.columns)
 
-    def __getitem__(self, item: int) -> Frame:
+    def __getitem__(self, item: int | slice) -> Frame | Iterator[Frame]:
         """
         Get a `Frame` object for the specified index.
 
@@ -152,9 +162,19 @@ class Sequence:
         Frame
             Frame object containing all vehicle, infrastructure, and sensor data for the timestamp.
         """
+
+        if isinstance(item, slice):
+            yield from self._iter_slice(item)
+            return
+
         this_step_info = self.time_sync_df.iloc[:, item].to_dict()
         frame = self.extract_one_timestamp_data(this_step_info)
         return frame
+
+    def _iter_slice(self, item: slice) -> Iterator[Frame]:
+        for i in range(*item.indices(len(self))):
+            this_step_info = self.time_sync_df.iloc[:, i].to_dict()
+            yield self.extract_one_timestamp_data(this_step_info)
 
     def __iter__(self):
         """Iterate over all frames in the sequence."""
@@ -184,6 +204,8 @@ class Sequence:
 
         # Parse vehicle and infrastructure data
         for k, v in this_step_info.items():
+            if pd.isna(v):
+                continue
             # ---------------- Vehicle Sensors ----------------
             if k.startswith("vehicle"):
                 vehicle_name = k.split("_")[0]
@@ -194,14 +216,14 @@ class Sequence:
                 vehicle = frame.vehicles[vehicle_name]
 
                 if k.endswith("camera"):
-                    with open(
-                        os.path.join(
+                    state_file = os.path.join(
                             self.sequence_root,
                             vehicle_state_name,
                             str((int(v.split(".")[0]) // 10) * 10) + ".json",
-                        ),
-                        "r",
-                    ) as f:
+                        )
+                    if not os.path.isfile(state_file):
+                        continue
+                    with open(state_file, "r") as f:
                         vehicle_state = json.load(f)
                     gTv = np.asarray(vehicle_state["gTv"])
                     cTv = self.calib_data[k]["extrinsics"]["cTv"]
@@ -220,14 +242,14 @@ class Sequence:
                     vehicle.add_camera(k, camera_data)
 
                 elif k.endswith("lidar"):
-                    with open(
-                        os.path.join(
+                    state_file = os.path.join(
                             self.sequence_root,
                             vehicle_state_name,
                             str((int(v.split(".")[0]) // 10) * 10) + ".json",
-                        ),
-                        "r",
-                    ) as f:
+                        )
+                    if not os.path.isfile(state_file):
+                        continue
+                    with open(state_file, "r") as f:
                         vehicle_state = json.load(f)
                     gTv = np.asarray(vehicle_state["gTv"])
                     vTl = self.calib_data[k]["extrinsics"]["vTl"]
@@ -243,14 +265,14 @@ class Sequence:
                     vehicle.add_state(vehicle_state)
 
             # ---------------- Infrastructure Sensors ----------------
-            elif k.startswith("crossing"):
+            elif k.startswith("crossing") or k.startswith("roundabout"):
                 infra_name = k.split("_")[0]
                 if infra_name not in frame.infrastructures:
                     frame.infrastructures[infra_name] = Infrastructure(infra_name, vehicle_states_id_mapping[infra_name])
                 infra = frame.infrastructures[infra_name]
 
                 if k.endswith("camera"):
-                    cTg = self.calib_data[k]["extrinsics"]["cTg"]
+                    cTg = self.calib_data[k]["extrinsics"]["cTg"] @ self.gTws[infra_name]
                     iTc = self.calib_data[k]["intrinsics"]["IntrinsicMatrixNew"]
                     undistort_function = self.calib_data[k]["intrinsics"]["undistort_function"]
                     image_size = self.calib_data[k]["intrinsics"]["ImageSize"]
@@ -265,7 +287,7 @@ class Sequence:
                     infra.add_camera(k, camera_data)
 
                 elif k.endswith("lidar"):
-                    gTl = self.calib_data[k]["extrinsics"]["gTl"]
+                    gTl = self.wTgs[infra_name] @ self.calib_data[k]["extrinsics"]["gTl"]
                     lidar_data = LidarData(k, os.path.join(self.sequence_root, k, v), gTl, lidar_index_mapping[k])
                     infra.add_lidar(k, lidar_data)
 

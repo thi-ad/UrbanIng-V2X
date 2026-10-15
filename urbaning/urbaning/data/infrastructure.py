@@ -123,10 +123,15 @@ class Infrastructure:
             Fused LiDAR point cloud in global coordinates of shape (N, 3) or (N, 4).
         """
         if self._fused_point_cloud_in_global_coordinates is None:
-            self._fused_point_cloud_in_global_coordinates = np.concatenate(
-                [lidar.point_cloud_in_global_coordinates() for lidar in self.lidars.values()],
-                axis=0,
+            point_clouds = [lidar.point_cloud_in_global_coordinates() for lidar in self.lidars.values()]
+            self._fused_point_cloud_in_global_coordinates = (
+                np.concatenate(point_clouds, axis=0) if len(point_clouds) else np.ones((1, 6))
             )
+
+            # self._fused_point_cloud_in_global_coordinates = np.concatenate(
+            #     [lidar.point_cloud_in_global_coordinates() for lidar in self.lidars.values()],
+            #     axis=0,
+            # )
         return self._fused_point_cloud_in_global_coordinates
 
     def fused_point_cloud_in_this_coordinates(self, origin: str) -> np.ndarray:

@@ -112,10 +112,10 @@ class Frame:
             Fused point cloud of shape (N, 3) or (N, 4) in global coordinates.
         """
         if self._fused_point_cloud_in_global_coordinates is None:
-            self._fused_point_cloud_in_global_coordinates = np.concatenate(
-                [vehicle.fused_point_cloud_in_global_coordinates() for vehicle in self.vehicles.values()]
-                + [infra.fused_point_cloud_in_global_coordinates() for infra in self.infrastructures.values()],
-                axis=0,
+            point_clouds = ([vehicle.fused_point_cloud_in_global_coordinates() for vehicle in self.vehicles.values()] +
+                            [infra.fused_point_cloud_in_global_coordinates() for infra in self.infrastructures.values()])
+            self._fused_point_cloud_in_global_coordinates = (
+                np.concatenate(point_clouds, axis=0) if len(point_clouds) else np.ones((1, 6))
             )
         return self._fused_point_cloud_in_global_coordinates
 

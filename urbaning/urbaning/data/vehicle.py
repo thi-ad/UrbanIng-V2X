@@ -134,9 +134,9 @@ class Vehicle:
     def fused_point_cloud_in_global_coordinates(self) -> np.ndarray:
         """Return fused point cloud from all LiDARs in global coordinates."""
         if self._fused_point_cloud_in_global_coordinates is None:
-            self._fused_point_cloud_in_global_coordinates = np.concatenate(
-                [lidar.point_cloud_in_global_coordinates() for lidar in self.lidars.values()],
-                axis=0,
+            point_clouds = [lidar.point_cloud_in_global_coordinates() for lidar in self.lidars.values()]
+            self._fused_point_cloud_in_global_coordinates = (
+                np.concatenate(point_clouds, axis=0) if len(point_clouds) else np.ones((1, 6))
             )
         return self._fused_point_cloud_in_global_coordinates
 

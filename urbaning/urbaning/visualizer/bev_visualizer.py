@@ -341,3 +341,74 @@ class BEVVisualizer:
             if text is None:
                 text = object_label.object_type[0:3] + ' ' + str(object_label.track_id)
             cv2.putText(self.current_image, text, all_points[4], cv2.FONT_HERSHEY_SIMPLEX, fontScale=text_scale, color=text_color, thickness=text_thickness, )
+
+
+    def plot_2d_contour(
+            self,
+            points: np.ndarray,
+            thickness: int = 2,
+            color=(255, 255, 255),
+            closed: bool = True,
+            filled: bool = False,
+    ) -> None:
+        """Plot a 2D contour in BEV coordinates.
+
+        Parameters
+        ----------
+        points : np.ndarray
+            N x 2 array of points in global coordinates, in meters.
+        thickness : int, default=2
+            Line thickness in pixels.
+        color : tuple, default=(255, 255, 255)
+            Contour color in BGR format.
+        closed : bool, default=True
+            Whether to connect the last point to the first point.
+        filled : bool, default=False
+            Whether to fill the contour.
+
+        Notes
+        -----
+        The points are assumed to be in global coordinates. If the
+        visualizer has a different origin set, the points are transformed
+        to that origin using the available coordinate transformation.
+        """
+
+        points = np.asarray(points)
+
+        if points.ndim != 2 or points.shape[1] != 2:
+            raise ValueError(
+                f"points must have shape (N, 2), got {points.shape}"
+            )
+
+        if len(points) < 2:
+            raise ValueError("At least 2 points are required to plot a contour")
+
+        # Convert global coordinates to the visualizer's current origin.
+        if self.origin is not None and self.origin != GLOBAL:
+            # If a coordinate transformation utility exists for your
+            # global coordinate representation, apply it here.
+            raise NotImplementedError(
+                "Transformation from GLOBAL to the current origin "
+                "must be implemented for plot_2d_contour()."
+            )
+
+        # Global meters -> BEV image pixels
+        image_points = self.transform_meters_to_images(points)
+        image_points = image_points.astype(np.int32)
+
+        contour = image_points.reshape(-1, 1, 2)
+
+        if filled:
+            self.current_image = cv2.fillPoly(
+                self.current_image,
+                [contour],
+                color=color,
+            )
+        else:
+            self.current_image = cv2.polylines(
+                self.current_image,
+                [contour],
+                isClosed=closed,
+                color=color,
+                thickness=thickness,
+            )

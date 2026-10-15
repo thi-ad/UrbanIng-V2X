@@ -43,6 +43,17 @@ crossing_lidars = {
         'crossing3_12_lidar',
         'crossing3_21_lidar',
         'crossing3_22_lidar'
+    ],
+    'roundabout1': [
+        "roundabout1_12_lidar",
+        "roundabout1_13_lidar",
+        "roundabout1_14_lidar",
+        "roundabout1_15_lidar",
+        "roundabout1_16_lidar",
+        "roundabout1_17_lidar",
+        "roundabout1_18_lidar",
+        "roundabout1_19_lidar",
+        "roundabout1_20_lidar",
     ]
 }
 
@@ -62,7 +73,15 @@ vehicle_cameras = {
         'vehicle2_front_right_camera',
         'vehicle2_right_camera',
         'vehicle2_back_right_camera',
-    ]
+    ],
+    'vehicle3': [
+        'vehicle3_back_left_camera',
+        'vehicle3_left_camera',
+        'vehicle3_front_left_camera',
+        'vehicle3_front_right_camera',
+        'vehicle3_right_camera',
+        'vehicle3_back_right_camera',
+    ],
 }
 
 vehicle_lidars = {
@@ -71,25 +90,42 @@ vehicle_lidars = {
     ],
     'vehicle2': [
         'vehicle2_middle_lidar',
+    ],
+    'vehicle3': [
+        'vehicle3_middle_lidar',
+    ],
+    'vehicle4': [
+        'vehicle4_middle_lidar',
+    ],
+    'vehicle5': [
+        'vehicle5_middle_lidar',
     ]
 }
 
 vehicle_states = {
     'vehicle1': 'vehicle1_state',
-    'vehicle2': 'vehicle2_state'
+    'vehicle2': 'vehicle2_state',
+    'vehicle3': 'vehicle3_state',
+    'vehicle5': 'vehicle5_state'
 }
 
 vehicle_colors = {  # bgr
     'vehicle1': (0, 0, 255),  # red
     'vehicle2': (255, 0, 0),  # blue
+    'vehicle3': (0, 255, 0),  # green
+    'vehicle5': (125, 68, 200),  # whatever
 }
 
 vehicle_states_id_mapping = {
     'vehicle1_state': 100000,
     'vehicle2_state': 200000,
+    'vehicle3_state': 300000,
+    'vehicle4_state': 400000,
+    'vehicle5_state': 500000,
     'crossing1': -1,
     'crossing2': -2,
-    'crossing3': -3
+    'crossing3': -3,
+    'roundabout1': -4
 }
 
 vehicle1_lidar_index = [1]  # [1, 7, 13, 19]
@@ -98,13 +134,21 @@ crossing1_lidar_index = [3, 9, 15, 21]
 crossing2_lidar_index = [4, 10, 16, 22]
 crossing3_lidar_index = [5, 11, 17, 23]
 vehicle2_lidar_index = [6]  # [6, 12, 18, 24]
+vehicle3_lidar_index = [12]
+vehicle4_lidar_index = [12]
+vehicle5_lidar_index = [13]
+roundabout1_lidar_index = [24, 25, 26, 27, 28, 29, 30, 31, 32]
 
 lidar_index_mapping = {
     **{t: i for t, i in zip(crossing_lidars['crossing1'], crossing1_lidar_index)},
     **{t: i for t, i in zip(crossing_lidars['crossing2'], crossing2_lidar_index)},
     **{t: i for t, i in zip(crossing_lidars['crossing3'], crossing3_lidar_index)},
+    **{t: i for t, i in zip(crossing_lidars['roundabout1'], roundabout1_lidar_index)},
     **{t: i for t, i in zip(vehicle_lidars['vehicle1'], vehicle1_lidar_index)},
     **{t: i for t, i in zip(vehicle_lidars['vehicle2'], vehicle2_lidar_index)},
+    **{t: i for t, i in zip(vehicle_lidars['vehicle3'], vehicle3_lidar_index)},
+    **{t: i for t, i in zip(vehicle_lidars['vehicle4'], vehicle4_lidar_index)},
+    **{t: i for t, i in zip(vehicle_lidars['vehicle5'], vehicle5_lidar_index)},
 }
 
 bl1, l1, fl1, fr1, r1, br1 = vehicle_cameras['vehicle1']
@@ -127,9 +171,11 @@ frame_level_pos_info = {
 }
 
 gps_origins = {
+    'outdoor': (48.78461825, 11.47318240, 420.759),
     'crossing1': (48.771731, 11.438043, 419),
     'crossing2': (48.772450, 11.441743, 419),
     'crossing3': (48.769060, 11.438518, 419),
+    'roundabout1': (48.754934, 11.477715, 419)
 }
 
 # ground_params = {  # with only states

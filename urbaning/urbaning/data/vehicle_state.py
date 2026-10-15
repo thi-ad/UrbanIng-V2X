@@ -72,9 +72,14 @@ class VehicleState:
         with open(state_file_path, "r") as f:
             state_data = json.load(f)
 
-        self.rotation_rates: np.ndarray = np.array(state_data["W"])
-        self.acceleration: np.ndarray = np.array(state_data["vA"])
-        self.velocity: np.ndarray = np.array(state_data["vV"])
+        if "W" in state_data:
+            self.rotation_rates = np.array(state_data["W"])
+
+        if "vA" in state_data:
+            self.acceleration = np.array(state_data["vA"])
+
+        if "vV" in state_data:
+            self.velocity = np.array(state_data["vV"])
         self.gTv_body: np.ndarray = np.asarray(state_data["gTv"])
 
         self.dimension: np.ndarray = vehicle_data["size"]
